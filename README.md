@@ -1,3 +1,5 @@
+![BuildStatus](https://github.com/blonn25/HW6-HMM/actions/workflows/test.yml/badge.svg?event=push)
+
 # HW6-HMM
 
 In this assignment, you'll implement the Forward and Viterbi Algorithms (dynamic programming). 
