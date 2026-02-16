@@ -17,6 +17,24 @@ class HiddenMarkovModel:
             emission_p (np.ndarray): emission probabilites from transition to hidden states 
         """             
         
+        # check to ensure the input shapes of provided matrices are compatible
+        if not observation_states.shape[0] == emission_p.shape[1]:
+            raise ValueError(f"Incompatible shapes for observation_states {observation_states.shape} and emission_p {emission_p.shape}")
+        if not hidden_states.shape[0] == emission_p.shape[0]:
+            raise ValueError(f"Incompatible shapes for hidden_states {hidden_states.shape} and emission_p {emission_p.shape}")
+        if not hidden_states.shape[0] == transition_p.shape[0]:
+            raise ValueError(f"Incompatible shapes for hidden_states {hidden_states.shape} and transition_p {transition_p.shape}")
+        if not hidden_states.shape[0] == transition_p.shape[1]:
+            raise ValueError(f"Incompatible shapes for hidden_states {hidden_states.shape} and transition_p {transition_p.shape}")
+        
+        # check to ensure that the probabilities add up to 1 for prior, transition and emission matrices
+        if not np.isclose(np.sum(prior_p), 1):
+            raise ValueError(f"Prior probabilities do not sum to 1, but instead sum to {np.sum(prior_p)}")
+        if not np.allclose(np.sum(transition_p, axis=1), 1):
+            raise ValueError(f"Transition probabilities do not sum to 1 for each row, but instead sum to {np.sum(transition_p, axis=1)}")
+        if not np.allclose(np.sum(emission_p, axis=1), 1):
+            raise ValueError(f"Emission probabilities do not sum to 1 for each row, but instead sum to {np.sum(emission_p, axis=1)}")
+
         self.observation_states = observation_states
         self.observation_states_dict = {state: index for index, state in enumerate(list(self.observation_states))}
 

@@ -3,6 +3,78 @@ from hmm import HiddenMarkovModel
 import numpy as np
 
 
+def test_hmm_incompatible_shapes():
+    """
+    test various edge cases related to hmm matrices with incompatible shape
+      during initialization of the HMM class.
+    """
+
+    # test incompatible shapes for provided matrices
+    with pytest.raises(ValueError, match="Incompatible shapes for observation_states"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),          # [2]
+            hidden_states=np.array(['hidden1', 'hidden2']),
+            prior_p=np.array([0.5, 0.5]),
+            transition_p=np.array([[0.5, 0.5], [0.5, 0.5]]),
+            emission_p=np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]) # [2, 3] (second dim should be 2)
+        )
+    with pytest.raises(ValueError, match="Incompatible shapes for hidden_states"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),
+            hidden_states=np.array(['hidden1', 'hidden2']),             # [2]
+            prior_p=np.array([0.5, 0.5]),
+            transition_p=np.array([[0.5, 0.5], [0.5, 0.5]]),
+            emission_p=np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])   # [3, 2] (first dim should be 2)
+        )
+    with pytest.raises(ValueError, match="Incompatible shapes for hidden_states"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),
+            hidden_states=np.array(['hidden1', 'hidden2']),                 # [2]
+            prior_p=np.array([0.5, 0.5]),
+            transition_p=np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]),    # [3, 2] (first dim should be 2)
+            emission_p=np.array([[0.5, 0.5], [0.5, 0.5]])
+        )
+    with pytest.raises(ValueError, match="Incompatible shapes for hidden_states"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),
+            hidden_states=np.array(['hidden1', 'hidden2']),             # [2]
+            prior_p=np.array([0.5, 0.5]),
+            transition_p=np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]),  # [2, 3] (second dim should be 2)
+            emission_p=np.array([[0.5, 0.5], [0.5, 0.5]])
+        )
+
+
+def test_hmm_invalid_probs():
+    """
+    test various edge cases related to hmm matrices which do not have probabilities
+    summing to 1 during initialization of the HMM class.
+    """
+
+    # test probability matrices which do not sum to 1
+    with pytest.raises(ValueError, match="Prior probabilities do not sum to 1"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),
+            hidden_states=np.array(['hidden1', 'hidden2']),
+            prior_p=np.array([0.5, 0.6]),                       # sums to 1.1, should raise error
+            transition_p=np.array([[0.5, 0.5], [0.5, 0.5]]),
+            emission_p=np.array([[0.5, 0.5], [0.5, 0.5]])
+        )
+    with pytest.raises(ValueError, match="Transition probabilities do not sum to 1 for each row"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),
+            hidden_states=np.array(['hidden1', 'hidden2']),
+            prior_p=np.array([0.5, 0.5]),
+            transition_p=np.array([[0.5, 0.6], [0.5, 0.5]]),    # second column sums to 1.1, should raise error
+            emission_p=np.array([[0.5, 0.5], [0.5, 0.5]])
+        )
+    with pytest.raises(ValueError, match="Emission probabilities do not sum to 1 for each row"):
+        hmm = HiddenMarkovModel(
+            observation_states=np.array(['obs1', 'obs2']),
+            hidden_states=np.array(['hidden1', 'hidden2']),
+            prior_p=np.array([0.5, 0.5]),
+            transition_p=np.array([[0.5, 0.5], [0.5, 0.5]]),
+            emission_p=np.array([[0.5, 0.5], [0.5, 0.6]])       # second column sums to 1.1, should raise error
+        )
 
 
 def test_mini_weather():
