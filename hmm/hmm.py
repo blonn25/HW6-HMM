@@ -43,12 +43,35 @@ class HiddenMarkovModel:
 
         # Step 1. Initialize variables
         
+        # store store the forward probabilities of hidden state at each step (rows are observation states, cols are the hidden states)
+        forward_table = np.zeros((len(input_observation_states), len(self.hidden_states)))
        
+
         # Step 2. Calculate probabilities
 
+        # fill in first row in the forward table based on prior probs
+        first_obs_idx = self.observation_states_dict[input_observation_states[0]]
+        for hidden_st_idx in range(len(self.hidden_states)):
+            forward_table[0, hidden_st_idx] = self.prior_p[hidden_st_idx] * self.emission_p[hidden_st_idx, first_obs_idx]
 
-        # Step 3. Return final probability 
-        
+        # fill in the rest of the table based on forward algorithm
+        for t in range(1, len(input_observation_states)):
+
+            # compute the index in the emission table of the current observation state
+            obs_idx = self.observation_states_dict[input_observation_states[t]]
+
+            # compute the forward probs for each hidden state at time t given the observation state
+            for hidden_st_idx in range(len(self.hidden_states)):
+
+                # compute the forward probs for each hidden state given each previous hidden states and the known over observation state
+                forward_table[t, hidden_st_idx] = np.sum(forward_table[t-1, :] * self.transition_p[:, hidden_st_idx] * self.emission_p[hidden_st_idx, obs_idx])
+
+        # compute the forward probability of the final observed state by summing over the probs of each hidden state at the final time step
+        forward_probability = np.sum(forward_table[-1, :])
+
+
+        # Step 3. Return final probability        
+        return forward_probability
 
 
     def viterbi(self, decode_observation_states: np.ndarray) -> list:
@@ -70,8 +93,10 @@ class HiddenMarkovModel:
         viterbi_table = np.zeros((len(decode_observation_states), len(self.hidden_states)))
         
         # store best path for traceback
-        best_path = np.zeros(len(decode_observation_states))         
-        
+        best_path = np.zeros(len(decode_observation_states), dtype=int)
+
+        # store the a backtrace matrix for constructing the best path
+        backpointers = np.zeros((len(decode_observation_states), len(self.hidden_states)), dtype=int)
 
         # Step 2. Calculate Probabilities
         
@@ -89,34 +114,26 @@ class HiddenMarkovModel:
             # compute the viterbi probs for each hidden state at time t
             for hidden_st_idx in range(len(self.hidden_states)):
 
-                # initialize the max prob and the best previous state idx which yielded it (for traceback)
-                max_prob = 0
-                best_prev_st_idx = 0
+                # compute the probabilities of each hidden state given each previous hidden state
+                hidden_probs = viterbi_table[t-1, :] * self.transition_p[:, hidden_st_idx]
 
-                # compute the probabilities for each hidden state given each previous hidden states
-                for prev_hidden_st_idx in range(len(self.hidden_states)):
+                # update the viterbi table using the highest probability and store backpointer
+                best_prev_st_idx = int(np.argmax(hidden_probs))
+                viterbi_table[t, hidden_st_idx] = hidden_probs[best_prev_st_idx] * self.emission_p[hidden_st_idx, obs_idx]
+                backpointers[t, hidden_st_idx] = best_prev_st_idx
 
-                    # compute prob of emission given the current hidden state and the previous hidden state
-                    prob = viterbi_table[t-1, prev_hidden_st_idx] * self.transition_p[prev_hidden_st_idx, hidden_st_idx]
 
-                    # if the prob is higher than the current max prob, update the max prob and best_prev_st_idx
-                    if prob > max_prob:
-                        max_prob = prob
-                        best_prev_st_idx = prev_hidden_st_idx
+        # Step 3. Traceback
 
-                # update the viterbi table and the best path table
-                viterbi_table[t, hidden_st_idx] = max_prob * self.emission_p[hidden_st_idx, obs_idx]
-                best_path[t-1] = best_prev_st_idx
-
-        # update the best path for the final time step
+        # start from the best final hidden state
         best_path[-1] = np.argmax(viterbi_table[-1, :])
 
+        # traceback through each of the previous steps
+        for t in range(len(decode_observation_states)-1, 0, -1):
+            best_path[t-1] = backpointers[t, best_path[t]]
 
-        # Step 3. Traceback 
-        
         # convert hidden state indices to names
         best_hidden_state_sequence = [self.hidden_states_dict[idx] for idx in best_path]
-
 
         # Step 4. Return best hidden state sequence 
         return best_hidden_state_sequence
