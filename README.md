@@ -2,7 +2,11 @@
 
 # HW6-HMM
 
-In this assignment, you'll implement the Forward and Viterbi Algorithms (dynamic programming). 
+In this assignment, I implemented the Forward and Viterbi Algorithms - dynamic programming approaches for determining forward probability of a given observation sequence and the most probable hidden state sequence for a given observation sequence, respectively. These algorithms are implemented as part of the `HiddenMarkovModel` class in the `forward()` and `viterbi()` methods.
+
+1. Forward Algorithm (`HiddenMarkovModel.forward()`): takes a given observation sequence and computes the forward probability of that sequence given the hmm model. This is done by completing a dynamic programming matrix where each entry the sum of all possible hidden state sequences that could have generated the observation sequence up to that point. The final forward probability is calculated by summing the probabilities of the final columns of the dynamic programming matrix and returned to the user.
+
+2. Viterbi Algorithm (`HiddenMarkovModel.viterbi()`): takes a given observation sequence and computes the most probable hidden state sequence assocaited with that observation sequence given the hmm model. This is accomplished be completing a dynamic programming matrix where each entry is the probability of the most probable path to that point, and a backtracing matrix is stored to enable reconstruction of the most probable path upon completion of the matrix. The most probable path is then returned to the user as a list of hidden states.
 
 
 # Assignment

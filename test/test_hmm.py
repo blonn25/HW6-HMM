@@ -32,17 +32,15 @@ def test_mini_weather():
         emission_p=mini_hmm['emission_p']
     )
 
-    # run the forward algorithm on the observation sequence
+    # run the forward algorithm on the observation sequence and assert correctness
     forward_probability = hmm.forward(mini_input['observation_state_sequence'])
+    expected_forward_probability = 0.03506441162109375
+    assert np.isclose(forward_probability, expected_forward_probability), f"Expected forward probability {expected_forward_probability}, but got {forward_probability}"
 
-    # run the viterbi algorithm on the observation sequence
-    my_best_hidden_state_sequence = hmm.viterbi(mini_input['observation_state_sequence'])
-
-    # check that the forward probability is correct
-    # assert np.isclose(forward_probability, mini_input['forward_probability']), f"Expected forward probability {mini_input['forward_probability']}, but got {forward_probability}"
-
-    # check that the output of my viterbi algorithm is correct
-    assert my_best_hidden_state_sequence == list(mini_input['best_hidden_state_sequence']),f"Expected best hidden state sequence {mini_input['best_hidden_state_sequence']}, but got {my_best_hidden_state_sequence}"
+    # run the viterbi algorithm on the observation sequence and assert correctness
+    best_hidden_state_sequence = hmm.viterbi(mini_input['observation_state_sequence'])
+    expected_hidden_state_sequence = list(mini_input['best_hidden_state_sequence'])
+    assert best_hidden_state_sequence == expected_hidden_state_sequence,f"Expected best hidden state sequence {expected_hidden_state_sequence}, but got {best_hidden_state_sequence}"
 
 
 def test_full_weather():
@@ -70,52 +68,13 @@ def test_full_weather():
         emission_p=full_hmm['emission_p']
     )
 
-    # run the forward algorithm on the observation sequence
+    # run the forward algorithm on the observation sequence and assert correctness
     forward_probability = hmm.forward(full_input['observation_state_sequence'])
+    expected_forward_probability = 1.6864513843961343e-11
+    assert np.isclose(forward_probability, expected_forward_probability), f"Expected forward probability {expected_forward_probability}, but got {forward_probability}"
 
-    # run the viterbi algorithm on the observation sequence
-    my_best_hidden_state_sequence = hmm.viterbi(full_input['observation_state_sequence'])
-
-    # check that the forward probability is correct
-    # assert np.isclose(forward_probability, full_input['forward_probability']), f"Expected forward probability {full_input['forward_probability']}, but got {forward_probability}"
-
-    # check that the output of my viterbi algorithm is correct
-    assert my_best_hidden_state_sequence == list(full_input['best_hidden_state_sequence']),f"Expected best hidden state sequence {full_input['best_hidden_state_sequence']}, but got {my_best_hidden_state_sequence}"
-
-
-
-# mini weather:
-
-# ---- sequence ----
-
-# observation_state_sequence
-# ['sunny' 'rainy' 'rainy' 'sunny' 'rainy']
-
-# best_hidden_state_sequence
-# ['hot' 'cold' 'cold' 'hot' 'cold']
-
-
-# ---- hmm ----
-
-# observation_states
-# ['sunny' 'rainy']
-
-# prior_p
-# [0.6 0.4]
-
-# transition_p
-# [[0.55 0.45]
-#  [0.3  0.7 ]]
-
-# emission_p
-# [[0.65 0.35]
-#  [0.15 0.85]]
-
-
-
-
-
-
-
-
+    # run the viterbi algorithm on the observation sequence and assert correctness
+    best_hidden_state_sequence = hmm.viterbi(full_input['observation_state_sequence'])
+    expected_hidden_state_sequence = list(full_input['best_hidden_state_sequence'])
+    assert best_hidden_state_sequence == expected_hidden_state_sequence, f"Expected best hidden state sequence {expected_hidden_state_sequence}, but got {best_hidden_state_sequence}"
 
