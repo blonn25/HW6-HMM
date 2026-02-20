@@ -112,8 +112,9 @@ def test_mini_weather():
     # run the viterbi algorithm on the observation sequence and assert correctness
     best_hidden_state_sequence = hmm.viterbi(mini_input['observation_state_sequence'])
     expected_hidden_state_sequence = list(mini_input['best_hidden_state_sequence'])
+    assert len(best_hidden_state_sequence) == len(expected_hidden_state_sequence), f"Expected best hidden state sequence of length {len(expected_hidden_state_sequence)}, but got sequence of length {len(best_hidden_state_sequence)}"
     assert best_hidden_state_sequence == expected_hidden_state_sequence,f"Expected best hidden state sequence {expected_hidden_state_sequence}, but got {best_hidden_state_sequence}"
-
+    
 
 def test_full_weather():
 
@@ -148,5 +149,6 @@ def test_full_weather():
     # run the viterbi algorithm on the observation sequence and assert correctness
     best_hidden_state_sequence = hmm.viterbi(full_input['observation_state_sequence'])
     expected_hidden_state_sequence = list(full_input['best_hidden_state_sequence'])
+    assert len(best_hidden_state_sequence) == len(expected_hidden_state_sequence), f"Expected best hidden state sequence of length {len(expected_hidden_state_sequence)}, but got sequence of length {len(best_hidden_state_sequence)}"
     assert best_hidden_state_sequence == expected_hidden_state_sequence, f"Expected best hidden state sequence {expected_hidden_state_sequence}, but got {best_hidden_state_sequence}"
 
